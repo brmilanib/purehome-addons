@@ -1,0 +1,7 @@
+configuration:
+  activation_code:
+    name: Activation code
+    description: PH-XXXX-XXXX code shown on the installation page of the PureHome Portal. Only used on first connection.
+  portal_url:
+    name: Portal URL
+    description: Keep the default (https://www.purehome.com.br) unless PureHome tells you otherwise.

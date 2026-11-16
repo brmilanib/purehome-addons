@@ -1,0 +1,21 @@
+name: PureHome Agent
+version: "1.0.0"
+slug: purehome_agent
+description: Conecta este Home Assistant ao Portal PureHome (saúde, backup, atualização e dispositivos).
+url: https://github.com/brmilanib/purehome-addons/tree/main/purehome_agent
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+init: false
+hassio_api: true
+hassio_role: manager
+homeassistant_api: true
+auth_api: false
+options:
+  activation_code: ""
+  portal_url: "https://www.purehome.com.br"
+schema:
+  activation_code: str?
+  portal_url: url
