@@ -19,3 +19,4 @@ options:
 schema:
   activation_code: str?
   portal_url: url
+  vercel_bypass: password?

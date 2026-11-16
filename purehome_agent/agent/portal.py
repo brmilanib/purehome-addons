@@ -25,18 +25,19 @@ class Revoked(PortalError):
 
 
 class PortalClient:
-    def __init__(self, session: aiohttp.ClientSession, base_url: str, token: str | None = None) -> None:
+    def __init__(self, session: aiohttp.ClientSession, base_url: str, token: str | None = None, bypass: str | None = None) -> None:
         self.session = session
         self.base = base_url.rstrip("/")
         self.token = token
+        # chave "Protection Bypass for Automation" da Vercel: só para testar contra um preview protegido
+        self.bypass = bypass or os.environ.get("VERCEL_BYPASS") or None
 
     def _headers(self) -> dict[str, str]:
         h = {"Accept": "application/json", "User-Agent": "PureHomeAgent"}
         if self.token:
             h["Authorization"] = f"Bearer {self.token}"
-        bypass = os.environ.get("VERCEL_BYPASS")  # só para testar em preview protegido da Vercel
-        if bypass:
-            h["x-vercel-protection-bypass"] = bypass
+        if self.bypass:
+            h["x-vercel-protection-bypass"] = self.bypass
         return h
 
     async def _request(self, method: str, path: str, body: dict | None = None) -> dict[str, Any]:
@@ -51,10 +52,17 @@ class PortalClient:
                     data = {}
                 if not isinstance(data, dict):
                     data = {}
-                if resp.status == 401:
-                    raise Revoked(data.get("error") or "Token revogado", 401)
+                erro = data.get("error")
+                # a API do portal sempre responde {"error": "texto"}; outro formato vem de fora (ex.: proteção da Vercel)
+                do_portal = isinstance(erro, str)
+                if resp.status == 401 and do_portal:
+                    raise Revoked(erro, 401)
+                if resp.status in (401, 403) and not do_portal:
+                    raise PortalError(
+                        "Acesso bloqueado antes de chegar ao portal (proteção da Vercel?). "
+                        "Confira o Endereço do portal e a chave de teste do preview.", resp.status, retry=True)
                 if resp.status >= 400:
-                    msg = data.get("error") or f"HTTP {resp.status}"
+                    msg = erro if do_portal else f"HTTP {resp.status}"
                     raise PortalError(msg, resp.status, retry=resp.status >= 500 or resp.status == 429)
                 return data
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:

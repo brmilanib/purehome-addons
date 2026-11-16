@@ -13,6 +13,7 @@ DEFAULT_PORTAL = "https://www.purehome.com.br"
 class Options:
     activation_code: str
     portal_url: str
+    vercel_bypass: str = ""
 
 
 def data_dir() -> Path:
@@ -27,7 +28,8 @@ def load_options(path: Path | None = None) -> Options:
         raw = {}
     code = str(raw.get("activation_code") or "").strip().upper()
     portal = str(raw.get("portal_url") or DEFAULT_PORTAL).strip().rstrip("/")
-    return Options(activation_code=code, portal_url=portal)
+    bypass = str(raw.get("vercel_bypass") or "").strip()
+    return Options(activation_code=code, portal_url=portal, vercel_bypass=bypass)
 
 
 @dataclass

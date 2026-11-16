@@ -5,3 +5,6 @@ configuration:
   portal_url:
     name: Portal URL
     description: Keep the default (https://www.purehome.com.br) unless PureHome tells you otherwise.
+  vercel_bypass:
+    name: Preview test key (optional)
+    description: Only for PureHome tests against a protected Vercel preview. Leave empty for customers.

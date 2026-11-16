@@ -54,7 +54,7 @@ class Agent:
             try:
                 info = await self.hardware_info()
                 log.info("Registrando no portal %s com o código %s...", opts.portal_url, opts.activation_code)
-                resp = await PortalClient(self.session, opts.portal_url).register(opts.activation_code, info)
+                resp = await PortalClient(self.session, opts.portal_url, bypass=opts.vercel_bypass).register(opts.activation_code, info)
                 state = State(
                     installation_id=int(resp["installation_id"]),
                     agent_token=str(resp["agent_token"]),
@@ -136,7 +136,7 @@ class Agent:
     async def run_forever(self) -> None:
         while True:
             state, opts = await self.ensure_registered()
-            client = PortalClient(self.session, opts.portal_url, state.agent_token)
+            client = PortalClient(self.session, opts.portal_url, state.agent_token, opts.vercel_bypass)
             try:
                 async with asyncio.TaskGroup() as tg:
                     tg.create_task(self.heartbeat_loop(client, state.heartbeat_interval_s))
@@ -148,7 +148,7 @@ class Agent:
     async def run_once(self) -> None:
         """Um ciclo só (testes e --dry-run --once): registra, 1 heartbeat, 1 busca de tarefas."""
         state, opts = await self.ensure_registered()
-        client = PortalClient(self.session, opts.portal_url, state.agent_token)
+        client = PortalClient(self.session, opts.portal_url, state.agent_token, opts.vercel_bypass)
         try:
             await client.heartbeat(await self.collect_metrics())
             for task in await client.tasks():

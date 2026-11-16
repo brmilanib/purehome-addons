@@ -41,6 +41,7 @@ há quanto tempo o equipamento está ligado.
 | `Sem código de ativação` | Cole o código na aba Configuração, salve e reinicie o add-on. |
 | `Código de ativação inválido` / `expirado` / `já foi usado` | No portal, clique em **Gerar novo código**, cole o novo, salve e reinicie. |
 | `Agente revogado — informe novo código de ativação` | Alguém revogou este equipamento no portal. Gere um novo código, cole, salve e reinicie. |
+| `Acesso bloqueado antes de chegar ao portal (proteção da Vercel?)` | Só em testes da PureHome contra um preview: confira o Endereço do portal e a Chave de teste do preview. |
 | `Portal indisponível ... Nova tentativa em ...` | Sem internet ou portal fora do ar. O agente tenta de novo sozinho (até a cada 5 min). |
 
 Para trocar o equipamento de instalação: no portal, **Revogar agente**, e repita a partir do passo 5 com o novo código.

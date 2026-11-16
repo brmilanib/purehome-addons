@@ -5,3 +5,6 @@ configuration:
   portal_url:
     name: Endereço do portal
     description: Deixe o padrão (https://www.purehome.com.br), a não ser que a PureHome peça outro.
+  vercel_bypass:
+    name: Chave de teste do preview (opcional)
+    description: Só para testes da PureHome contra um preview protegido da Vercel. Deixe em branco em clientes.

@@ -145,7 +145,14 @@ class FakePortal:
         app.router.add_post("/api/agent/heartbeat", self._heartbeat)
         app.router.add_get("/api/agent/tasks", self._tasks)
         app.router.add_post("/api/agent/tasks/{id}/result", self._result)
+        # imita a proteção da Vercel (401 com outro formato de corpo), liberada pelo header de bypass
+        app.router.add_post("/vercel/api/agent/heartbeat", self._vercel)
         return app
+
+    async def _vercel(self, request: web.Request) -> web.Response:
+        if request.headers.get("x-vercel-protection-bypass") != "chave-teste":
+            return web.json_response({"error": {"message": "Protected deployment", "code": "401"}}, status=401)
+        return web.json_response({"ok": True})
 
     def _auth(self, request: web.Request) -> web.Response | None:
         if self.fail_next:
@@ -314,6 +321,15 @@ class TestPortalEAgente(Base):
         with self.assertRaises(PortalError) as e:
             await PortalClient(self.session, "http://127.0.0.1:9").heartbeat({})
         self.assertTrue(e.exception.retry)
+
+    async def test_protecao_vercel_nao_revoga(self) -> None:
+        c = PortalClient(self.session, self.url + "/vercel", self.portal.token)
+        with self.assertRaises(PortalError) as e:
+            await c.heartbeat({})
+        self.assertNotIsInstance(e.exception, Revoked)
+        self.assertTrue(e.exception.retry)
+        self.assertIn("proteção da Vercel", str(e.exception))
+        await PortalClient(self.session, self.url + "/vercel", self.portal.token, "chave-teste").heartbeat({})
 
     async def test_ciclo_completo_sem_vazar_token(self) -> None:
         with self.assertLogs("purehome", level="INFO") as logs:
